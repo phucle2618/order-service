@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,5 +77,62 @@ public class OrderDetailRepository {
          e.printStackTrace();
       }
       return new ArrayList<>();
+   }
+
+   public void save(OrderDetail orderDetail, Connection externalConnection) throws SQLException {
+      String sql = "";
+      Connection connection = externalConnection;
+      if (orderDetail.getId() == null) {
+         sql = "INSERT INTO order_details (order_id, product_id, product_name, unit_price, quantity, total_price) VALUES (?, ?, ?, ?, ?, ?)";
+      } else {
+         sql = "UPDATE order_details SET order_id = ?, product_id = ?, product_name = ?, unit_price = ?, quantity = ?, total_price = ? WHERE id = ?";
+      }
+      try { 
+         if (connection == null) {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(true);
+         }
+         PreparedStatement preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+         preparedStatement.setLong(1, orderDetail.getOrderId());
+         preparedStatement.setLong(2, orderDetail.getProductId());
+         preparedStatement.setString(3, orderDetail.getProductName());
+         preparedStatement.setBigDecimal(4, orderDetail.getUnitPrice());
+         preparedStatement.setInt(5, orderDetail.getQuantity());
+         preparedStatement.setBigDecimal(6, orderDetail.getTotalPrice());
+         if (orderDetail.getId() != null) {
+            preparedStatement.setLong(7, orderDetail.getId());
+         }
+         int affectedRows = preparedStatement.executeUpdate();
+         if (affectedRows == 0) {
+            throw new RuntimeException("Creating/updating order detail failed, no rows affected.");
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+
+   public void saveAll(List<OrderDetail> orderDetails, Connection externalConnection) throws SQLException {
+      String sql = "INSERT INTO order_details (order_id, product_id, product_name, unit_price, quantity, total_price) VALUES (?, ?, ?, ?, ?, ?)";
+      Connection connection = externalConnection;
+      try { 
+         if (connection == null) {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(true);
+         }
+         PreparedStatement preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+         for (OrderDetail orderDetail : orderDetails) {
+            preparedStatement.setLong(1, orderDetail.getOrderId());
+            preparedStatement.setLong(2, orderDetail.getProductId());
+            preparedStatement.setString(3, orderDetail.getProductName());
+            preparedStatement.setBigDecimal(4, orderDetail.getUnitPrice());
+            preparedStatement.setInt(5, orderDetail.getQuantity());
+            preparedStatement.setBigDecimal(6, orderDetail.getTotalPrice());
+            preparedStatement.addBatch();
+         }
+         preparedStatement.executeBatch();
+         connection.commit();
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
    }
 }

@@ -9,13 +9,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class OrderDetailResponse {
+@NoArgsConstructor
+public class ProductResponse {
    private Long id;
-   private Long productId;
-   private String productName;
-   private BigDecimal unitPrice;
-   private Integer quantity;
-   private BigDecimal totalPrice;
+   private String name;
+   private BigDecimal price;
 }

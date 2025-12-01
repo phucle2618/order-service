@@ -11,11 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDetailResponse {
+public class UpdateOrderDetailRequest {
    private Long id;
    private Long productId;
-   private String productName;
-   private BigDecimal unitPrice;
    private Integer quantity;
-   private BigDecimal totalPrice;
 }

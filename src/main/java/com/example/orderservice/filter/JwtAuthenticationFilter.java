@@ -23,7 +23,7 @@ import java.util.Date;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
    
-   @Value("${jwt.jwtSecret}")
+   @Value("${jwt.secret}")
    private String jwtSecret;
 
    @Override
