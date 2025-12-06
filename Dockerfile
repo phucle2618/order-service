@@ -1,13 +1,9 @@
-# Stage 1: build
-FROM maven:3.9.2-amazoncorretto-17 AS builder
+FROM maven:3.9.6-eclipse-temurin-17
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -DskipTests
-
-# Stage 2: runtime
-FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
+RUN mvn -q -DskipTests dependency:go-offline
+# Open port
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+# Run with devtools
+CMD ["mvn", "spring-boot:run"]
