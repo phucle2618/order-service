@@ -13,6 +13,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import io.jsonwebtoken.Claims;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import com.example.orderservice.logic.OrderLogic;
 import com.example.orderservice.dto.CreateOrderRequest;
 import com.example.orderservice.dto.CreateOrderResponse;
@@ -27,9 +33,13 @@ public class UserOrderController {
    @Autowired
    private OrderLogic orderLogic;
 
+   @Operation(summary = "Get order", description = "Returns order by order id with details.")
+   @ApiResponse(responseCode = "200", description = "Get order by order id", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PagedResponse.class)))
    @GetMapping(value = "/order/{id}", produces = "application/json")
    @PreAuthorize("hasRole('USER')")
-   public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+   public ResponseEntity<OrderResponse> getOrderById(
+      @Parameter(description = "Order ID") @RequestParam(required = true) @PathVariable Long id
+   ) {
       Order order = orderRepository.findById(id);
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
       Claims claims = (Claims) authentication.getDetails();
